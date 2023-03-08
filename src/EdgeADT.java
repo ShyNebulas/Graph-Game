@@ -1,5 +1,6 @@
 public interface EdgeADT {
     int getWeight();
-    int getStart();
-    int getDestination();
+    NodeADT getDestination();
+    @Override
+    public String toString();
 }
