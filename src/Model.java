@@ -45,7 +45,6 @@ public class Model implements ModelADT {
             //List adj = getAdjacent(nodes.get(current));
 
             //for all adjacent nodes, set tempDistance to weight of edge between current and adjacent
-            /*
 
             LinkedHashSet<EdgeADT> edges = this.graph.get(this.findMatchingNode(new Node(current)).get());
             for (EdgeADT edge : edges) {
@@ -57,40 +56,6 @@ public class Model implements ModelADT {
                 previous.set(j, nodes.get(current));
             }
 
-
-             */
-
-
-
-            for (int i = 0; i < adj.size(); i++) {
-                for (int j = 0; j < edges.size(); j++) {
-
-                    //once j goes beyond current then current will be the index of start node
-                    if (j > current) {
-                        if (edges.get(j).getStart() == current && edges.get(j).getDestination() == j) {
-                            //temp distance = weight of edge between current and adjacent + all nodes before it in chain
-                            tempDistance = edges.get(j).getWeight() + distance.get(distance.indexOf(previous.get(current)));
-                            //if tempDistance is less than the currently stored distance then change it and set the previous to
-                            if (tempDistance < distance.get(j)) {
-                                distance.set(j, tempDistance);
-                                previous.set(j, nodes.get(current));
-                            }
-
-                        }
-                    }
-                    else {
-                        if (edges.get(j).getStart() == j && edges.get(j).getDestination() == current) {
-                            //temp distance = weight of edge between current and adjacent + all nodes before it in chain
-                            tempDistance = edges.get(j).getWeight() + distance.get(distance.indexOf(previous.get(current)));
-                            //if tempDistance is less than the currently stored distance then change it and set the previous to
-                            if (tempDistance < distance.get(j)) {
-                                distance.set(current, tempDistance);
-                                previous.set(current, nodes.get(j));
-                            }
-                        }
-                    }
-                }
-            }
 
             visited.add(nodes.get(current));
         //drop below here when pQueue is empty
