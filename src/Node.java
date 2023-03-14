@@ -1,5 +1,5 @@
 import java.util.Objects;
-public class Node implements NodeADT {
+public class Node implements NodeADT, Comparable<NodeADT> {
     private final int position;
 
     public Node(int position) { this.position = position; }
@@ -18,4 +18,9 @@ public class Node implements NodeADT {
 
     @Override
     public String toString() { return String.format("Node %d", this.getPosition()); }
+
+    @Override
+    public int compareTo(NodeADT node) {
+        return this.position - node.getPosition();
+    }
 }

@@ -3,5 +3,6 @@ public interface NodeADT {
     @Override
     boolean equals(Object object);
     @Override
-    public String toString();
+    String toString();
+    int compareTo(NodeADT node);
 }
