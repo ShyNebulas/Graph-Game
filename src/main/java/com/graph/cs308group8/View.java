@@ -12,7 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.*;
 import javafx.scene.Scene;
 import javafx.scene.shape.*;
-import javafx.stage.Stage;
+import javafx.stage.*;
 import javafx.scene.text.*;
 
 import java.io.File;
@@ -173,7 +173,9 @@ public class View extends Application {
     public void start(Stage stage) {
         BorderPane root = new BorderPane();
 
-        Scene scene = new Scene(root, 1800, 1200);
+        Rectangle2D screenBounds = Screen.getPrimary().getBounds();
+
+        Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
         ObservableList<Node> nodes = root.getChildren();
 
         nodes.add(this.createTextFields());
@@ -202,9 +204,9 @@ public class View extends Application {
                 nodes.addAll(line, this.createWeight(line, edgeADT));
             }
         }
-
         stage.setTitle("Graph Game");
         stage.setScene(scene);
+        stage.setFullScreen(true);
         stage.show();
     }
 
