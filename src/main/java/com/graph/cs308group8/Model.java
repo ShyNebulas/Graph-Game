@@ -7,12 +7,12 @@ public class Model implements ModelADT {
     private final File file;
     private final TreeMap<NodeADT, LinkedHashSet<EdgeADT>> graph = new TreeMap<>();
 
-    public Model(File file) {
+    public Model(final File file) {
         this.file = file;
         createGraph();
     }
 
-    private Optional<NodeADT> findMatchingNode(NodeADT x) {
+    private Optional<NodeADT> findMatchingNode(final NodeADT x) {
         return this.graph.keySet().stream().filter(node -> node.equals(x)).findFirst();
     }
 
@@ -39,7 +39,7 @@ public class Model implements ModelADT {
 
     public TreeMap<NodeADT, LinkedHashSet<EdgeADT>> getGraph() { return this.graph; }
 
-    public PairADT<?, ?> calcRoute(NodeADT start, NodeADT destination) {
+    public PairADT<?, ?> calcRoute(final NodeADT start, final NodeADT destination) {
         TreeMap<NodeADT, Integer> distances = new TreeMap<>();
         TreeMap<NodeADT, NodeADT> previousNodes = new TreeMap<>();
         PriorityQueue<NodeADT> pq = new PriorityQueue<>(Comparator.comparingInt(value -> distances.getOrDefault(value, Integer.MAX_VALUE)));
