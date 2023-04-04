@@ -7,8 +7,8 @@ public class Model implements ModelADT {
     private final File file;
     private final TreeMap<NodeADT, LinkedHashSet<EdgeADT>> graph = new TreeMap<>();
 
-    public Model(final File file) {
-        this.file = file;
+    public Model(final String filename) {
+        this.file = new File(filename);
         createGraph();
     }
 
@@ -37,14 +37,54 @@ public class Model implements ModelADT {
         } catch (Exception error) { error.printStackTrace(); }
     }
 
+    public static boolean compareRoutes(String input, List<PairADT<Integer, List<NodeADT>>> pairs) {
+        if(input.matches(".*[a-z].*")) {
+            return false;
+        }
+        String[] split = input.split(",[ ]*");
+        if(Arrays.stream(split).anyMatch(string -> string.contains(" "))) {
+            return false;
+        }
+        if(split.length == 1) {
+            for(PairADT<Integer, List<NodeADT>> pairADT : pairs) {
+                Pair<Integer, List<NodeADT>> pair = (Pair<Integer, List<NodeADT>>) pairADT;
+                if(pair.key().equals(Integer.valueOf(input))) {
+                    return true;
+                }
+            }
+        }
+        innerLoop:
+        for(PairADT<Integer, List<NodeADT>> pairADT : pairs) {
+            Pair<Integer, List<NodeADT>> pair = (Pair<Integer, List<NodeADT>>) pairADT;
+            if(split.length > pair.value().size()) {
+                continue;
+            }
+            for(int i = 0; i < pair.value().size(); i++) {
+                if(i + 1 > split.length) {
+                    continue innerLoop;
+                }
+                Node node = (Node) pair.value().get(i);
+                if(node.value() != Integer.parseInt(split[i])) {
+                    continue innerLoop;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+
+
+
     public TreeMap<NodeADT, LinkedHashSet<EdgeADT>> getGraph() { return this.graph; }
 
-    public PairADT<?, ?> calcRoute(final NodeADT start, final NodeADT destination) {
+    public List<PairADT<Integer, List<NodeADT>>> calcRoutes(final NodeADT start, final NodeADT destination) {
         TreeMap<NodeADT, Integer> distances = new TreeMap<>();
-        TreeMap<NodeADT, NodeADT> previousNodes = new TreeMap<>();
+        TreeMap<NodeADT, List<List<NodeADT>>> paths = new TreeMap<>();
         PriorityQueue<NodeADT> pq = new PriorityQueue<>(Comparator.comparingInt(value -> distances.getOrDefault(value, Integer.MAX_VALUE)));
 
         distances.put(start, 0);
+        paths.put(start, new ArrayList<>(List.of(List.of(start))));
         pq.offer(start);
 
         while (!pq.isEmpty()){
@@ -63,35 +103,62 @@ public class Model implements ModelADT {
                     int distStartToNext = distances.get(nextNode);
                     if (distanceFromStart < distStartToNext){
                         distances.put(nextNode, distanceFromStart);
-                        previousNodes.put(nextNode, current);
+                        List<List<NodeADT>> newPaths = new ArrayList<>();
+                        for (List<NodeADT> path : paths.get(current)) {
+                            List<NodeADT> newPath = new ArrayList<>(path);
+                            newPath.add(nextNode);
+                            newPaths.add(newPath);
+                        }
+                        paths.put(nextNode, newPaths);
                         pq.remove(nextNode);
                         pq.offer(nextNode);
+                    } else if (distanceFromStart == distStartToNext) {
+                        List<List<NodeADT>> existingPaths = paths.getOrDefault(nextNode, new ArrayList<>());
+                        for (List<NodeADT> path : paths.get(current)) {
+                            List<NodeADT> newPath = new ArrayList<>(path);
+                            newPath.add(nextNode);
+                            existingPaths.add(newPath);
+                        }
+                        paths.put(nextNode, existingPaths);
                     }
                 } else {
                     distances.put(nextNode, distanceFromStart);
-                    previousNodes.put(nextNode, current);
+                    List<List<NodeADT>> newPaths = new ArrayList<>();
+                    for (List<NodeADT> path : paths.get(current)) {
+                        List<NodeADT> newPath = new ArrayList<>(path);
+                        newPath.add(nextNode);
+                        newPaths.add(newPath);
+                    }
+                    paths.put(nextNode, newPaths);
                     pq.offer(nextNode);
                 }
             }
         }
 
-        ArrayList<NodeADT> shortestPath = new ArrayList<>();
-        NodeADT current = destination;
-
-        while(previousNodes.containsKey(current)){
-            shortestPath.add(current);
-            current = previousNodes.get(current);
-        }
-
-        if(shortestPath.isEmpty()){
-            return null;
-        }
-
-        shortestPath.add(start);
-        Collections.reverse(shortestPath);
+        List<PairADT<Integer, List<NodeADT>>> shortestPaths = new ArrayList<>();
         int destDistance = distances.get(destination);
+        for (List<NodeADT> path : paths.getOrDefault(destination, new ArrayList<>())) {
+            shortestPaths.add(new Pair<>(destDistance, path));
+        }
 
-        return new Pair<>(destDistance, shortestPath);
+        for (PairADT<Integer, List<NodeADT>> shortestPath : shortestPaths) {
+            System.out.println(shortestPath);
+        }
+        return shortestPaths;
+    }
+
+
+    public Pair<NodeADT, NodeADT> createRandomPair() {
+        Random random = new Random();
+
+        NodeADT nodeX = (NodeADT) this.graph.keySet().toArray()[0];
+        NodeADT nodeY = (NodeADT) this.graph.keySet().toArray()[0];
+
+        while(nodeX.equals(nodeY)) {
+            nodeX = (NodeADT) this.graph.keySet().toArray()[random.nextInt(this.graph.keySet().size())];
+            nodeY = (NodeADT) this.graph.keySet().toArray()[random.nextInt(this.graph.keySet().size())];
+        }
+        return new Pair<>(nodeX, nodeY);
     }
 
     public void printGraph() {
